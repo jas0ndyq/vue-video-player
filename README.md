@@ -8,11 +8,11 @@
 
 
 # Vue-Video-Player
-[Video.js](https://github.com/videojs/video.js) player component for Vue.
+[Video.js](https://github.com/videojs/video.js) player component for Vue2.
 
 
 # Update
-Updated to video.js 6+.
+The latest version of the update, I hope the component itself is a simple and lightweight player, in addition to the videojs core library itself, no other packages; if you need other videojs extensions, you need to import the corresponding scriptjs plugin in the entry script file or component script Resource package.
 
 # Example
 [Demo Page](https://surmon-china.github.io/vue-video-player)
@@ -29,11 +29,6 @@ npm install vue-video-player --save
 ### Vue mount
 
 ``` javascript
-// require videojs style [and custom videojs theme]
-require('video.js/dist/video-js.css')
-require('vue-video-player/src/custom-theme.css')
-
-
 // import
 import Vue from 'vue'
 import VueVideoPlayer from 'vue-video-player'
@@ -49,22 +44,14 @@ Vue.use(VueVideoPlayer)
 
 
 // If used in Nuxt.js/SSR, you should keep it only in browser build environment
-if (process.browser) {
+if (process.BROWSER_BUILD) {
   const VueVideoPlayer = require('vue-video-player/ssr')
   Vue.use(VueVideoPlayer)
 }
 
 // If you need to use more videojs extensions, you can introduce the corresponding videojs plug-in package before the vue program is instantiated, such as:
-const { videojs } = VueVideoPlayer
-videojs.plugin('myPlugin', myPluginFunction)
-videojs.addLanguage('ml', myLanguageObject)
-videojs.registerPlugin('examplePlugin', examplePlugin)
-// videojs.[methods]...
-
-// or require videojs (plugins || langs || ...)
-require('video.js/dist/lang/ba')
-require('videos-some-plugins')
-require('videos...')
+require('some-videojs-plugin')
+// require more plugin resource...
 
 // mount with component(can't work in Nuxt.js/SSR)
 import { videoPlayer } from 'vue-video-player'
@@ -114,23 +101,24 @@ export default {
 
 ``` vue
 <template>
-  <video-player  class="video-player-box"
-                 ref="videoPlayer"
+  <video-player  ref="videoPlayer"
                  :options="playerOptions"
-                 :playsinline="true"
-                 customEventName="customstatechangedeventname"
 
+                 title="you can listen some event if you need"
                  @play="onPlayerPlay($event)"
                  @pause="onPlayerPause($event)"
                  @ended="onPlayerEnded($event)"
+                 @loadeddata="onPlayerLoadeddata($event)"
                  @waiting="onPlayerWaiting($event)"
                  @playing="onPlayerPlaying($event)"
-                 @loadeddata="onPlayerLoadeddata($event)"
                  @timeupdate="onPlayerTimeupdate($event)"
                  @canplay="onPlayerCanplay($event)"
                  @canplaythrough="onPlayerCanplaythrough($event)"
 
+                 title="or listen state change"
                  @statechanged="playerStateChanged($event)"
+
+                 title="The prepared event will be triggered after the videojs program instance completes, and its callback player object is the videojs callback function in this context"
                  @ready="playerReadied">
   </video-player>
 </template>
@@ -142,6 +130,11 @@ export default {
     data() {
       return {
         playerOptions: {
+
+          // component options
+          start: 0,
+          playsinline: false,
+
           // videojs options
           muted: true,
           language: 'en',
@@ -194,12 +187,16 @@ export default {
 
 # API
 - component api:
+  * start(number, default: 0): The time at which the player starts playing
   * playsinline(boolean, default: false): set player not full-screen in mobile device
   * customEventName(string, default: 'statechanged'): custom the state change event name
 
 - video.js api
   * [video.js api](http://docs.videojs.com/docs/api/player.html#Methodsmuted)
-  * [video.js docs](http://docs.videojs.com/#)
+
+
+# Videojs Issues
+- [videojs-contrib-hls](https://github.com/videojs/videojs-contrib-hls/issues/600)
 
 
 # Credits
@@ -213,18 +210,8 @@ export default {
 - [videojs-youtube](https://github.com/videojs/videojs-youtube)
 - [videojs-vimeo](https://github.com/videojs/videojs-vimeo)
 - [videojs-hotkeys](https://github.com/ctd1500/videojs-hotkeys)
-- [videojs-flash](https://github.com/videojs/videojs-flash)
-- [videojs-contrib-ads](https://github.com/videojs/videojs-contrib-ads)
 - [more plugins...](https://github.com/search?o=desc&q=videojs+plugin&s=stars&type=Repositories&utf8=%E2%9C%93)
 
-# License
-
-Licensed under either of
-
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
- * GNU General Public License, version 3 ([LICENSE-GPL](LICENSE-GPL) or https://opensource.org/licenses/GPL-3.0)
-
-at your option.
 
 # Author Blog
 [Surmon](https://surmon.me)

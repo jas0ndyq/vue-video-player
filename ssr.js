@@ -1,47 +1,42 @@
 
-window.videojs = require('video.js')
-videojs = videojs.default || videojs
+const videojs = window.videojs = require('video.js')
 
 var videoPlayer = {
-  videojs: videojs,
   install: function(Vue) {
     Vue.directive('video-player', {
       bind: function(el, binding, vnode) {
         if (!el.children.length) {
           var video = document.createElement('video')
-          video.className = 'video-js'
+          video.className = 'video-js vjs-custom-skin'
           el.appendChild(video)
         }
       },
       inserted: function (el, binding, vnode) {
 
         var _this = vnode.context
-        var attrs = vnode.data.attrs || {}
-        var customInstanceName = attrs.playerInstanceName || binding.arg
+        var customInstanceName = vnode.data.attrs ? vnode.data.attrs.playerInstanceName : binding.arg
         var instanceName = customInstanceName || 'player'
         var options = binding.value || {}
         var player = _this[instanceName]
-        var playsinline = attrs.playsinline || false
-        var customEventName = attrs.customEventName || 'statechanged'
-
-        // playsinline
-        if (playsinline) {
-          el.children[0].setAttribute('playsinline', playsinline)
-          el.children[0].setAttribute('webkit-playsinline', playsinline)
-        }
 
         // initialize
         if (!player) {
 
           var optionsKey
           var defaultOptions = {
+
+            // component options
+            start: 0,
+            playsinline: false,
+            customEventName: 'statechanged',
+
             // videojs options
             autoplay: false,
             controls: true,
             preload: 'auto',
             fluid: false,
             muted: false,
-            width: '100%',
+            width: '1100',
             height: '360',
             language: 'en',
             controlBar: {
@@ -54,7 +49,7 @@ var videoPlayer = {
                 vertical: true
               }
             },
-            techOrder: ['html5'],
+            techOrder: ['html5', 'flash'],
             playbackRates: []
           }
 
@@ -65,9 +60,7 @@ var videoPlayer = {
             }
           }
 
-          if (options.plugins) {
-            delete options.plugins.__ob__
-          }
+          delete options.plugins.__ob__
           // console.log(options)
 
           var eventEmit = function (vnode, name, data) {
@@ -85,7 +78,7 @@ var videoPlayer = {
             if (value) {
               var values = {}
               values[event] = value
-              eventEmit(vnode, customEventName, values)
+              eventEmit(vnode, options.customEventName, values)
             }
           }
           
@@ -93,25 +86,43 @@ var videoPlayer = {
           player = _this[instanceName] = videojs(el.children[0], options, function() {
 
             // player ready
-            var self = this
             emitPlayerState('ready')
 
-            // events
-            var events = ['loadeddata', 
-                          'canplay', 
-                          'canplaythrough', 
-                          'play', 
-                          'pause', 
-                          'waiting', 
-                          'playing', 
-                          'ended']
-            for (var i = 0; i < events.length; i++) {
-              (function(event) {
-                self.on(event, function() {
-                  emitPlayerState(event, true)
-                })
-              })(events[i])
-            }
+            this.on('loadeddata', function() {
+              this.muted(options.muted)
+              if (!!options.start) {
+                this.currentTime(options.start)
+              }
+              emitPlayerState('loadeddata', true)
+            })
+
+            this.on('canplay', function() {
+              emitPlayerState('canplay', true)
+            })
+
+            this.on('canplaythrough', function() {
+              emitPlayerState('canplaythrough', true)
+            })
+
+            this.on('play', function() {
+              emitPlayerState('play', true)
+            })
+
+            this.on('pause', function() {
+              emitPlayerState('pause', true)
+            })
+
+            this.on('waiting', function() {
+              emitPlayerState('waiting', true)
+            })
+
+            this.on('playing', function() {
+              emitPlayerState('playing', true)
+            })
+
+            this.on('ended', function() {
+              emitPlayerState('ended', true)
+            })
 
             this.on('timeupdate', function() {
               emitPlayerState('timeupdate', this.currentTime())
@@ -129,7 +140,7 @@ var videoPlayer = {
           videojs(el.children[0]).dispose()
           if (!el.children.length) {
             var video = document.createElement('video')
-            video.className = 'video-js'
+            video.className = 'video-js vjs-custom-skin'
             el.appendChild(video)
           }
           _this[instanceName] = null

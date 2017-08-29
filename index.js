@@ -6,15 +6,14 @@
  */
 
 window.videojs = require('video.js')
-videojs = videojs.default || videojs
-var playerComponent = require('./src/player.vue')
-playerComponent = playerComponent.default || playerComponent
+require('video.js/dist/video-js.css')
 
+var playerComponent = require('./player.vue')
 var videoPlayer = {
   videojs: videojs,
   videoPlayer: playerComponent,
   install: function(Vue) {
-    Vue.component(playerComponent.name, playerComponent)
+    Vue.component('video-player', playerComponent)
   }
 }
 
