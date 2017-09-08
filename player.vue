@@ -153,6 +153,10 @@
           this.on('timeupdate', function() {
             emitPlayerState('timeupdate', this.currentTime())
           })
+
+          this.on('seeked', function() {
+            emitPlayerState('seeked', this.currentTime())
+          })
         })
       },
       dispose() {
